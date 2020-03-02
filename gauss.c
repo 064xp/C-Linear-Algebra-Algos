@@ -1,75 +1,74 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-float **inicializarMatriz(int filas, int columnas);
-void liberarMatriz(float **matriz, int filas, int columnas);
-void resolverGaussJordan (float **matriz, int filas, int columnas);
-void imprimirMatriz(float **matriz, int fila, int columna);
-void rellenarMatriz(float **matriz, int filas, int columnas);
+typedef struct matriz{
+  float **matriz;
+  int filas;
+  int columnas;
+} Matriz;
+
+Matriz inicializarMatriz(int filas, int columnas);
+void liberarMatriz(Matriz matriz);
+void resolverGaussJordan (Matriz matriz);
+void imprimirMatriz(Matriz matriz);
+
+void rellenarMatriz(Matriz matriz);
 
 int main(){
-    int filas = 3, columnas = 3;
-    float **matriz = inicializarMatriz(filas, columnas);
-    rellenarMatriz(matriz, filas, columnas);
-    imprimirMatriz(matriz, filas, columnas);
+    Matriz m1 = inicializarMatriz(3, 4);
+    rellenarMatriz(m1);
+    imprimirMatriz(m1);
+
     printf("\n\n\n");
-    resolverGaussJordan(matriz, filas, columnas);
-    liberarMatriz(matriz, filas, columnas);
+    // resolverGaussJordan(m1);
+    imprimirMatriz(m1);
+    liberarMatriz(m1);
 }
 
-void resolverGaussJordan (float **matriz, int filas, int columnas)
+void resolverGaussJordan (Matriz matriz)
 {
-	int i,j;
-	int filaActual = 0;
-	float valorDividir;
-	float temporalElemento;
-    int valorMultiplicar;
+  int i,j;
+  float valorDividir;
+  float temporalElemento;
+  int valorMultiplicar;
 
-//intercambiar renglones en caso de que el valor de la primera pos	sea == 0 
-// convertirlo en un ciclo
-	if(matriz[filaActual][filaActual] == 0) 
-	{
-		if(matriz[filaActual+1][filaActual] == 0)
-		{
-			temporalElemento = matriz[filaActual+1][filaActual];
-			matriz[filaActual+1][filaActual]= matriz[filaActual][filaActual];
-			matriz[filaActual][filaActual] = temporalElemento;
-		}
-	}
-	
-	//Hacer 1 la fila actual
-	valorDividir = matriz[filaActual][filaActual];
-	for(i=0; i<columnas ;i++)
-	{
-		matriz[filaActual][i] /= valorDividir;
-
-	}
+  // //intercambiar renglones en caso de que el valor de la primera pos	sea == 0
+  // // TODO convertirlo en un ciclo
+  // if(matriz.matriz[filaActual][filaActual] == 0)
+  // {
+  // 	if(matriz.matriz[filaActual+1][filaActual] == 0)
+  // 	{
+  // 		temporalElemento = matriz.matriz[filaActual+1][filaActual];
+  // 		matriz.matriz[filaActual+1][filaActual]= matriz.matriz[filaActual][filaActual];
+  // 		matriz.matriz[filaActual][filaActual] = temporalElemento;
+  // 	}
+  // }
+  //
+  for(i=0; i<matriz.filas; i++)
+  {
+    //Hacer 1 la fila actual
+    valorDividir = matriz.matriz[i][i];
+    for(j=0; j<matriz.columnas; j++)
+    {
+    	matriz.matriz[i][j] /= valorDividir;
+    }
 
     //Hacer 0 el resto de la columna
 
-    
-
-    i=0;
-		valorMultiplicar = matriz[filas+1][i]*matriz[filas][i]*-1;
-	for(i=1;i<=filas;i++)
-	{
-		for(j=0;j<columnas;j++)
-		{
-			matriz[filas+i][j] = matriz[filas][j]*valorMultiplicar+matriz[filas+i][j];
-		}
-	}
-
-
-    imprimirMatriz(matriz, filas, columnas);
+  } //Fin for filas
 }
 
-float **inicializarMatriz(int filas, int columnas){
+Matriz inicializarMatriz(int filas, int columnas){
     int i;
-    float **matriz = malloc(sizeof(float *) * filas);
-    if (matriz){
+    Matriz matriz;
+
+    matriz.filas = filas;
+    matriz.columnas = columnas;
+    matriz.matriz = (float **)malloc(sizeof(float *) * filas);
+    if (matriz.matriz){
       for (i = 0; i < filas; i++){
-        matriz[i] = malloc(sizeof (float) * columnas);
-        if(matriz[i] == NULL){
+        matriz.matriz[i] = malloc(sizeof (float) * columnas);
+        if(matriz.matriz[i] == NULL){
             perror("Peluquin");
             exit(1);
         }
@@ -82,38 +81,46 @@ float **inicializarMatriz(int filas, int columnas){
     return matriz;
 }
 
-void liberarMatriz(float **matriz, int filas, int columnas){
+void liberarMatriz(Matriz matriz){
     int i, j;
-    for(i=0; i<filas; i++){
-        free(matriz[i]);
+    for(i=0; i<matriz.filas; i++){
+        free(matriz.matriz[i]);
     }
-    free(matriz);
+    free(matriz.matriz);
 }
 
-void imprimirMatriz(float **matriz, int fila, int columna)
+void imprimirMatriz(Matriz matriz)
 {
     int i, j;
-    for(i=0;i<fila;i++)
+    for(i=0;i<matriz.filas;i++)
 		{
-			for(j=0;j<columna;j++)
+			for(j=0;j<matriz.columnas;j++)
 			{
-				printf("%0.2f ", matriz[i][j]);
+				printf("%0.2f ", matriz.matriz[i][j]);
 			}
 			printf("\n");
 		}
 }
 
 //FUNCIONES DE DESARROLLO
-void rellenarMatriz(float **matriz, int filas, int columnas){
-    matriz[0][0] = 2;
-    matriz[0][1] = 6;
-    matriz[0][2] = 10;
+void rellenarMatriz(Matriz matriz){
+    /*
+    | 1   -2  4  -2 |
+    | 2  -1   2   4 |
+    | 3   -3  6   2 |
+    */
+    matriz.matriz[0][0] = 2;
+    matriz.matriz[0][1] = -2;
+    matriz.matriz[0][2] = 4;
+    matriz.matriz[0][3] = -2;
 
-    matriz[1][0] = 16;
-    matriz[1][1] = 24;
-    matriz[1][2] = 12;
+    matriz.matriz[1][0] = 2;
+    matriz.matriz[1][1] = -1;
+    matriz.matriz[1][2] = 2;
+    matriz.matriz[1][3] = 4;
 
-    matriz[2][0] = 4;
-    matriz[2][1] = 8;
-    matriz[2][2] = 18;
+    matriz.matriz[2][0] = 3;
+    matriz.matriz[2][1] = -3;
+    matriz.matriz[2][2] = 6;
+    matriz.matriz[2][3] = 2;
 }
