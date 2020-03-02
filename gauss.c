@@ -11,18 +11,30 @@ Matriz inicializarMatriz(int filas, int columnas);
 void liberarMatriz(Matriz matriz);
 void resolverGaussJordan (Matriz matriz);
 void imprimirMatriz(Matriz matriz);
+int sumarMatrices(Matriz *destino, Matriz m1, Matriz m2);
+int restarMatrices(Matriz *destino, Matriz m1, Matriz m2);
 
 void rellenarMatriz(Matriz matriz);
 
 int main(){
     Matriz m1 = inicializarMatriz(3, 4);
+    Matriz m2 = inicializarMatriz(3, 4);
     rellenarMatriz(m1);
+    rellenarMatriz(m2);
+
+    printf("Matriz A:\n");
     imprimirMatriz(m1);
 
-    printf("\n\n\n");
-    // resolverGaussJordan(m1);
+    printf("\n\n\nSuma A+A\n");
+    sumarMatrices(&m1, m1, m1);
     imprimirMatriz(m1);
+
+    printf("\n\n\nRestar (A+A) - A\n");
+    restarMatrices(&m1, m1, m2);
+    imprimirMatriz(m1);
+
     liberarMatriz(m1);
+    liberarMatriz(m2);
 }
 
 void resolverGaussJordan (Matriz matriz)
@@ -56,6 +68,32 @@ void resolverGaussJordan (Matriz matriz)
     //Hacer 0 el resto de la columna
 
   } //Fin for filas
+}
+
+int sumarMatrices(Matriz *destino, Matriz m1, Matriz m2){
+  int i, j;
+  if(m1.filas != m2.filas || m1.columnas != m2.columnas){
+    return 1;
+  }
+  for(i=0; i<m1.filas; i++){
+    for(j=0; j<m1.columnas; j++){
+      destino->matriz[i][j] = m1.matriz[i][j] + m2.matriz[i][j];
+    }
+  }
+  return 0;
+}
+
+int restarMatrices(Matriz *destino, Matriz m1, Matriz m2){
+  int i, j;
+  if(m1.filas != m2.filas || m1.columnas != m2.columnas){
+    return 1;
+  }
+  for(i=0; i<m1.filas; i++){
+    for(j=0; j<m1.columnas; j++){
+      destino->matriz[i][j] = m1.matriz[i][j] - m2.matriz[i][j];
+    }
+  }
+  return 0;
 }
 
 Matriz inicializarMatriz(int filas, int columnas){
