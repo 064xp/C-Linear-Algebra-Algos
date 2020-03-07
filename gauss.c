@@ -9,21 +9,23 @@ typedef struct matriz{
 
 Matriz inicializarMatriz(int filas, int columnas);
 void liberarMatriz(Matriz matriz);
-void resolverGaussJordan (Matriz *matriz);
+int resolverGaussJordan (Matriz *matriz);
 void imprimirMatriz(Matriz matriz);
 int sumarMatrices(Matriz *destino, Matriz m1, Matriz m2);
 int restarMatrices(Matriz *destino, Matriz m1, Matriz m2);
 void hacerCero(Matriz *matriz, int pivote);
+int validarMatriz(Matriz *matriz);
 
 void rellenarMatriz(Matriz matriz);
 
 int main(){
-    Matriz m1 = inicializarMatriz(3, 4);
-    Matriz m2 = inicializarMatriz(3, 4);
+	int fila=3,columna=4, error = 0;
+    Matriz m1 = inicializarMatriz(fila, columna);
+    Matriz m2 = inicializarMatriz(fila, columna);
     rellenarMatriz(m1);
     rellenarMatriz(m2);
 
-    printf("Matriz A:\n");
+    printf("Matriz A (Matriz original):\n");
     imprimirMatriz(m1);
 
     printf("\n\n\nSuma A+A\n");
@@ -35,47 +37,104 @@ int main(){
     imprimirMatriz(m1);
 
     printf("\n\n\nGauss Jordan A\n");
-    resolverGaussJordan(&m2);
     imprimirMatriz(m2);
+    printf("\n\n");
+    error = resolverGaussJordan(&m2);
+    imprimirMatriz(m2);
+    if(error == 1){
+      printf("El sistema no tiene soluciones\n");
+    } else if(error == 2){
+      printf("El sistema tiene soluciones infinitas\n");
+    }
 
     liberarMatriz(m1);
     liberarMatriz(m2);
-	
+
 	return 0;
 }
 
-void resolverGaussJordan(Matriz *matriz)
+/*
+  Metodo de eliminación de Gauss Jordan.
+  Recibe una matriz matriz y regresa un número entero dependiendo de la solución.
+  0: El sistema si tiene soluciones
+  1: El sistema no tiene solución
+  2: El sistema tiene soluciones infinitas
+*/
+int resolverGaussJordan(Matriz *matriz)
 {
-  int i,j;
-  float modificador;
-  int pivote = 0;
+  int i,j, error, pivote = 0;
+  float modificador, temporalElemento;
 
   // //intercambiar renglones en caso de que el valor de la primera pos	sea == 0
-  // // TODO convertirlo en un ciclo
-  // if(matriz.matriz[filaActual][filaActual] == 0)
-  // {
-  // 	if(matriz.matriz[filaActual+1][filaActual] == 0)
-  // 	{
-  // 		temporalElemento = matriz.matriz[filaActual+1][filaActual];
-  // 		matriz.matriz[filaActual+1][filaActual]= matriz.matriz[filaActual][filaActual];
-  // 		matriz.matriz[filaActual][filaActual] = temporalElemento;
-  // 	}
-  // }
-  //
+   if(matriz->matriz[0][0] == 0)
+   {
+		for(i=1;i<=matriz->filas;i++)
+		{
+			if(matriz->matriz[i][0] != 0)
+			{
+  			for(j=0;j<matriz->columnas;j++)
+  			{
+  					temporalElemento = matriz->matriz[i][j];
+  					matriz->matriz[i][j]= matriz->matriz[0][j];
+  					matriz->matriz[0][j] = temporalElemento;
+        }
+        break;
+			}
+	  }
+  }
+
+  //Hacer 1 el pivote de la fila actual
   for(i=0; i<matriz->filas; i++)
   {
-    //Hacer 1 la fila actual
     modificador = matriz->matriz[i][i];
     for(j=0; j<matriz->columnas; j++)
     {
     	matriz->matriz[i][j] /= modificador;
     }
+
     //Hacer 0 el resto de la columna
     hacerCero(matriz, pivote);
-	pivote++;
-	imprimirMatriz(*matriz);
-	printf("\n\n");
+
+    pivote++;
+    imprimirMatriz(*matriz);
+    printf("\n\n");
+
+    if((error = validarMatriz(matriz)))
+    {
+      return error;
+    }
   } //Fin for filas
+
+  return 0;
+}
+
+/*
+  Parte de Gauss Jordan
+  Revisa la última fila de la Matriz para determinar
+  si tiene soluciones infinitas o no tiene soluciones
+  Recibe una matriz y regresa un número entero
+  1: No tiene soluciones
+  2: Tiene soluciones infinitas
+*/
+int validarMatriz(Matriz *matriz)
+{
+	int contador=0, j;
+	for(j=0;j<matriz->columnas;j++)
+	{
+		if((int)matriz->matriz[matriz->filas-1][j] == 0)
+		{
+			contador++;
+		}
+  }//Fin for
+	if(contador >= matriz->columnas-1)
+	{
+    if((int)matriz->matriz[matriz->filas-1][matriz->columnas-1] == 0){
+      return 2;
+    } else {
+      return 1;
+    }
+	}
+	return 0;
 }
 
 void hacerCero(Matriz *matriz, int pivote)
@@ -188,18 +247,52 @@ void rellenarMatriz(Matriz matriz){
     | 2  -1   2   4 |
     | 3   -3  6   2 |
     */
+
+    //Sin solucion
+    // matriz.matriz[0][0] = 1;
+    // matriz.matriz[0][1] = -3;
+    // matriz.matriz[0][2] = 2;
+    // matriz.matriz[0][3] = -4;
+    //
+    // matriz.matriz[1][0] = 2;
+    // matriz.matriz[1][1] = 5;
+    // matriz.matriz[1][2] = -3;
+    // matriz.matriz[1][3] = 1;
+    //
+    // matriz.matriz[2][0] = 3;
+    // matriz.matriz[2][1] = 2;
+    // matriz.matriz[2][2] = -1;
+    // matriz.matriz[2][3] = -2;
+
+    //soluciones infinitas
     matriz.matriz[0][0] = 1;
     matriz.matriz[0][1] = -2;
-    matriz.matriz[0][2] = 3;
-    matriz.matriz[0][3] = 2;
+    matriz.matriz[0][2] = 4;
+    matriz.matriz[0][3] = -2;
 
     matriz.matriz[1][0] = 2;
-    matriz.matriz[1][1] = 1;
-    matriz.matriz[1][2] = -4;
-    matriz.matriz[1][3] = -1;
+    matriz.matriz[1][1] = -1;
+    matriz.matriz[1][2] = 2;
+    matriz.matriz[1][3] = 4;
 
-    matriz.matriz[2][0] = 1;
-    matriz.matriz[2][1] = 1;
-    matriz.matriz[2][2] = -1;
-    matriz.matriz[2][3] = 1;
+    matriz.matriz[2][0] = 3;
+    matriz.matriz[2][1] = -3;
+    matriz.matriz[2][2] = 6;
+    matriz.matriz[2][3] = 2;
+
+    //Soluciones reales
+    // matriz.matriz[0][0] = 2;
+    // matriz.matriz[0][1] = -3;
+    // matriz.matriz[0][2] = 6;
+    // matriz.matriz[0][3] = -4;
+    //
+    // matriz.matriz[1][0] = 3;
+    // matriz.matriz[1][1] = 1;
+    // matriz.matriz[1][2] = -5;
+    // matriz.matriz[1][3] = 8;
+    //
+    // matriz.matriz[2][0] = 7;
+    // matriz.matriz[2][1] = -1;
+    // matriz.matriz[2][2] = 1;
+    // matriz.matriz[2][3] = 6;
 }
