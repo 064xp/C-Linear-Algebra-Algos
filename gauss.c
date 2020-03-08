@@ -19,38 +19,38 @@ int validarMatriz(Matriz *matriz);
 void rellenarMatriz(Matriz matriz);
 
 int main(){
-	int fila=3,columna=4, error = 0;
-    Matriz m1 = inicializarMatriz(fila, columna);
-    Matriz m2 = inicializarMatriz(fila, columna);
-    rellenarMatriz(m1);
-    rellenarMatriz(m2);
+  int fila=3,columna=4, error = 0;
+  Matriz m1 = inicializarMatriz(fila, columna);
+  Matriz m2 = inicializarMatriz(fila, columna);
+  rellenarMatriz(m1);
+  rellenarMatriz(m2);
 
-    printf("Matriz A (Matriz original):\n");
-    imprimirMatriz(m1);
+  printf("Matriz A (Matriz original):\n");
+  imprimirMatriz(m1);
 
-    printf("\n\n\nSuma A+A\n");
-    sumarMatrices(&m1, m1, m1);
-    imprimirMatriz(m1);
+  printf("\n\n\nSuma A+A\n");
+  sumarMatrices(&m1, m1, m1);
+  imprimirMatriz(m1);
 
-    printf("\n\n\nRestar (A+A) - A\n");
-    restarMatrices(&m1, m1, m2);
-    imprimirMatriz(m1);
+  printf("\n\n\nRestar (A+A) - A\n");
+  restarMatrices(&m1, m1, m2);
+  imprimirMatriz(m1);
 
-    printf("\n\n\nGauss Jordan A\n");
-    imprimirMatriz(m2);
-    printf("\n\n");
-    error = resolverGaussJordan(&m2);
-    imprimirMatriz(m2);
-    if(error == 1){
-      printf("El sistema no tiene soluciones\n");
-    } else if(error == 2){
-      printf("El sistema tiene soluciones infinitas\n");
-    }
+  printf("\n\n\nGauss Jordan A\n");
+  imprimirMatriz(m2);
+  printf("\n\n");
+  error = resolverGaussJordan(&m2);
+  imprimirMatriz(m2);
+  if(error == 1){
+    printf("El sistema no tiene soluciones\n");
+  } else if(error == 2){
+    printf("El sistema tiene soluciones infinitas\n");
+  }
 
-    liberarMatriz(m1);
-    liberarMatriz(m2);
+  liberarMatriz(m1);
+  liberarMatriz(m2);
 
-	return 0;
+  return 0;
 }
 
 /*
@@ -65,22 +65,22 @@ int resolverGaussJordan(Matriz *matriz)
   int i,j, error, pivote = 0;
   float modificador, temporalElemento;
 
-  // //intercambiar renglones en caso de que el valor de la primera pos	sea == 0
-   if(matriz->matriz[0][0] == 0)
-   {
-		for(i=1;i<=matriz->filas;i++)
-		{
-			if(matriz->matriz[i][0] != 0)
-			{
-  			for(j=0;j<matriz->columnas;j++)
-  			{
-  					temporalElemento = matriz->matriz[i][j];
-  					matriz->matriz[i][j]= matriz->matriz[0][j];
-  					matriz->matriz[0][j] = temporalElemento;
+  //intercambiar renglones en caso de que el valor de la primera pos	sea == 0
+  if(matriz->matriz[0][0] == 0)
+  {
+    for(i=1;i<=matriz->filas;i++)
+    {
+      if(matriz->matriz[i][0] != 0)
+      {
+        for(j=0;j<matriz->columnas;j++)
+        {
+        temporalElemento = matriz->matriz[i][j];
+        matriz->matriz[i][j]= matriz->matriz[0][j];
+        matriz->matriz[0][j] = temporalElemento;
         }
-        break;
-			}
-	  }
+      break;
+      }
+    }
   }
 
   //Hacer 1 el pivote de la fila actual
@@ -118,41 +118,42 @@ int resolverGaussJordan(Matriz *matriz)
 */
 int validarMatriz(Matriz *matriz)
 {
-	int contador=0, j;
-	for(j=0;j<matriz->columnas;j++)
-	{
-		if((int)matriz->matriz[matriz->filas-1][j] == 0)
-		{
-			contador++;
-		}
+  int contador=0, j;
+  for(j=0;j<matriz->columnas;j++)
+  {
+    if((int)matriz->matriz[matriz->filas-1][j] == 0)
+    {
+      contador++;
+    }
   }//Fin for
-	if(contador >= matriz->columnas-1)
-	{
-    if((int)matriz->matriz[matriz->filas-1][matriz->columnas-1] == 0){
+  if(contador >= matriz->columnas-1)
+  {
+    if((int)matriz->matriz[matriz->filas-1][matriz->columnas-1] == 0)
+    {
       return 2;
     } else {
       return 1;
     }
-	}
-	return 0;
+  }
+  return 0;
 }
 
 void hacerCero(Matriz *matriz, int pivote)
 {
-	int i ,j;
-	float modificador;
-	for(i=0; i<matriz->filas; i++)
-	{
-		if (i == pivote)
-		{
-			continue;
-		}
-		modificador = matriz->matriz[i][pivote]*-1;
-		for(j=0; j<matriz->columnas; j++)
-		{
-			matriz->matriz[i][j] += matriz->matriz[pivote][j]*modificador;
-		}
-	}
+  int i ,j;
+  float modificador;
+  for(i=0; i<matriz->filas; i++)
+  {
+    if (i == pivote)
+    {
+      continue;
+    }
+    modificador = matriz->matriz[i][pivote]*-1;
+    for(j=0; j<matriz->columnas; j++)
+    {
+      matriz->matriz[i][j] += matriz->matriz[pivote][j]*modificador;
+    }
+  }
 }
 
 
@@ -229,15 +230,15 @@ void liberarMatriz(Matriz matriz)
 
 void imprimirMatriz(Matriz matriz)
 {
-    int i, j;
-    for(i=0;i<matriz.filas;i++)
-		{
-			for(j=0;j<matriz.columnas;j++)
-			{
-				printf("%0.2f ", matriz.matriz[i][j]);
-			}
-			printf("\n");
-		}
+  int i, j;
+  for(i=0;i<matriz.filas;i++)
+  {
+    for(j=0;j<matriz.columnas;j++)
+    {
+      printf("%0.2f ", matriz.matriz[i][j]);
+    }
+  printf("\n");
+  }
 }
 
 //FUNCIONES DE DESARROLLO
