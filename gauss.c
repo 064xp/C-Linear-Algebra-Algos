@@ -9,46 +9,64 @@ typedef struct matriz{
 
 Matriz inicializarMatriz(int filas, int columnas);
 void liberarMatriz(Matriz matriz);
-int resolverGaussJordan (Matriz *matriz);
+int resolverGaussJordan (Matriz matriz);
 void imprimirMatriz(Matriz matriz);
-int sumarMatrices(Matriz *destino, Matriz m1, Matriz m2);
-int restarMatrices(Matriz *destino, Matriz m1, Matriz m2);
-void hacerCero(Matriz *matriz, int pivote);
-int validarMatriz(Matriz *matriz);
+int sumarMatrices(Matriz destino, Matriz m1, Matriz m2);
+int restarMatrices(Matriz destino, Matriz m1, Matriz m2);
+int multiplicarMatrices(Matriz destino, Matriz m1, Matriz m2);
+void hacerCero(Matriz matriz, int pivote);
+int validarMatriz(Matriz matriz);
 
 void rellenarMatriz(Matriz matriz);
+void rellenarMatrizCuadrada(Matriz matriz);
 
 int main(){
   int fila=3,columna=4, error = 0;
   Matriz m1 = inicializarMatriz(fila, columna);
   Matriz m2 = inicializarMatriz(fila, columna);
+  Matriz m3 = inicializarMatriz(3, 3);
+  Matriz m4 = inicializarMatriz(3, 3);
+
+  rellenarMatrizCuadrada(m3);
   rellenarMatriz(m1);
   rellenarMatriz(m2);
 
-  printf("Matriz A (Matriz original):\n");
+  printf("\nMatriz A (Matriz original):\n");
   imprimirMatriz(m1);
+  printf("\n\n-------------------------------------\n\n");
 
-  printf("\n\n\nSuma A+A\n");
-  sumarMatrices(&m1, m1, m1);
+  printf("Suma A+A\n");
+  sumarMatrices(m1, m1, m1);
   imprimirMatriz(m1);
+  printf("\n\n-------------------------------------\n\n");
 
-  printf("\n\n\nRestar (A+A) - A\n");
-  restarMatrices(&m1, m1, m2);
+  printf("Restar (A+A) - A\n");
+  restarMatrices(m1, m1, m2);
   imprimirMatriz(m1);
+  printf("\n\n-------------------------------------\n\n");
 
-  printf("\n\n\nGauss Jordan A\n");
+  printf("Gauss Jordan A\n");
   imprimirMatriz(m2);
   printf("\n\n");
-  error = resolverGaussJordan(&m2);
+  error = resolverGaussJordan(m2);
   imprimirMatriz(m2);
   if(error == 1){
     printf("El sistema no tiene soluciones\n");
   } else if(error == 2){
     printf("El sistema tiene soluciones infinitas\n");
   }
+  printf("\n\n-------------------------------------\n\n");
+
+  printf("Matriz B:\n");
+  imprimirMatriz(m3);
+  printf("\nMultiplicar B*B\n");
+  multiplicarMatrices(m4, m3, m3);
+  imprimirMatriz(m4);
 
   liberarMatriz(m1);
   liberarMatriz(m2);
+  liberarMatriz(m3);
+  liberarMatriz(m4);
 
   return 0;
 }
@@ -60,23 +78,23 @@ int main(){
   1: El sistema no tiene solución
   2: El sistema tiene soluciones infinitas
 */
-int resolverGaussJordan(Matriz *matriz)
+int resolverGaussJordan(Matriz matriz)
 {
   int i,j, error, pivote = 0;
   float modificador, temporalElemento;
 
   //intercambiar renglones en caso de que el valor de la primera pos	sea == 0
-  if(matriz->matriz[0][0] == 0)
+  if(matriz.matriz[0][0] == 0)
   {
-    for(i=1;i<=matriz->filas;i++)
+    for(i=1;i<=matriz.filas;i++)
     {
-      if(matriz->matriz[i][0] != 0)
+      if(matriz.matriz[i][0] != 0)
       {
-        for(j=0;j<matriz->columnas;j++)
+        for(j=0;j<matriz.columnas;j++)
         {
-        temporalElemento = matriz->matriz[i][j];
-        matriz->matriz[i][j]= matriz->matriz[0][j];
-        matriz->matriz[0][j] = temporalElemento;
+        temporalElemento = matriz.matriz[i][j];
+        matriz.matriz[i][j]= matriz.matriz[0][j];
+        matriz.matriz[0][j] = temporalElemento;
         }
       break;
       }
@@ -84,19 +102,19 @@ int resolverGaussJordan(Matriz *matriz)
   }
 
   //Hacer 1 el pivote de la fila actual
-  for(i=0; i<matriz->filas; i++)
+  for(i=0; i<matriz.filas; i++)
   {
-    modificador = matriz->matriz[i][i];
-    for(j=0; j<matriz->columnas; j++)
+    modificador = matriz.matriz[i][i];
+    for(j=0; j<matriz.columnas; j++)
     {
-    	matriz->matriz[i][j] /= modificador;
+    	matriz.matriz[i][j] /= modificador;
     }
 
     //Hacer 0 el resto de la columna
     hacerCero(matriz, pivote);
 
     pivote++;
-    imprimirMatriz(*matriz);
+    imprimirMatriz(matriz);
     printf("\n\n");
 
     if((error = validarMatriz(matriz)))
@@ -116,19 +134,19 @@ int resolverGaussJordan(Matriz *matriz)
   1: No tiene soluciones
   2: Tiene soluciones infinitas
 */
-int validarMatriz(Matriz *matriz)
+int validarMatriz(Matriz matriz)
 {
   int contador=0, j;
-  for(j=0;j<matriz->columnas;j++)
+  for(j=0;j<matriz.columnas;j++)
   {
-    if((int)matriz->matriz[matriz->filas-1][j] == 0)
+    if((int)matriz.matriz[matriz.filas-1][j] == 0)
     {
       contador++;
     }
   }//Fin for
-  if(contador >= matriz->columnas-1)
+  if(contador >= matriz.columnas-1)
   {
-    if((int)matriz->matriz[matriz->filas-1][matriz->columnas-1] == 0)
+    if((int)matriz.matriz[matriz.filas-1][matriz.columnas-1] == 0)
     {
       return 2;
     } else {
@@ -138,26 +156,26 @@ int validarMatriz(Matriz *matriz)
   return 0;
 }
 
-void hacerCero(Matriz *matriz, int pivote)
+void hacerCero(Matriz matriz, int pivote)
 {
   int i ,j;
   float modificador;
-  for(i=0; i<matriz->filas; i++)
+  for(i=0; i<matriz.filas; i++)
   {
     if (i == pivote)
     {
       continue;
     }
-    modificador = matriz->matriz[i][pivote]*-1;
-    for(j=0; j<matriz->columnas; j++)
+    modificador = matriz.matriz[i][pivote]*-1;
+    for(j=0; j<matriz.columnas; j++)
     {
-      matriz->matriz[i][j] += matriz->matriz[pivote][j]*modificador;
+      matriz.matriz[i][j] += matriz.matriz[pivote][j]*modificador;
     }
   }
 }
 
 
-int sumarMatrices(Matriz *destino, Matriz m1, Matriz m2)
+int sumarMatrices(Matriz destino, Matriz m1, Matriz m2)
 {
   int i, j;
   if(m1.filas != m2.filas || m1.columnas != m2.columnas)
@@ -168,13 +186,13 @@ int sumarMatrices(Matriz *destino, Matriz m1, Matriz m2)
   {
     for(j=0; j<m1.columnas; j++)
     {
-      destino->matriz[i][j] = m1.matriz[i][j] + m2.matriz[i][j];
+      destino.matriz[i][j] = m1.matriz[i][j] + m2.matriz[i][j];
     }
   }
   return 0;
 }
 
-int restarMatrices(Matriz *destino, Matriz m1, Matriz m2)
+int restarMatrices(Matriz destino, Matriz m1, Matriz m2)
 {
   int i, j;
   if(m1.filas != m2.filas || m1.columnas != m2.columnas)
@@ -185,7 +203,31 @@ int restarMatrices(Matriz *destino, Matriz m1, Matriz m2)
   {
     for(j=0; j<m1.columnas; j++)
     {
-      destino->matriz[i][j] = m1.matriz[i][j] - m2.matriz[i][j];
+      destino.matriz[i][j] = m1.matriz[i][j] - m2.matriz[i][j];
+    }
+  }
+  return 0;
+}
+
+int multiplicarMatrices(Matriz destino, Matriz m1, Matriz m2)
+{
+  int i, j, k;
+  float resultado = 0;
+
+  if(m1.columnas != m2.filas){
+    return 1;
+  }
+
+  for(i=0; i<m1.filas; i++)
+  {
+    for(j=0; j<m2.columnas; j++)
+    {
+      for(k=0; k<m1.columnas; k++)
+      {
+        resultado += m1.matriz[i][k] * m2.matriz[k][j];
+      }
+      destino.matriz[i][j] = resultado;
+      resultado = 0;
     }
   }
   return 0;
@@ -296,4 +338,18 @@ void rellenarMatriz(Matriz matriz){
     // matriz.matriz[2][1] = -1;
     // matriz.matriz[2][2] = 1;
     // matriz.matriz[2][3] = 6;
+}
+
+void rellenarMatrizCuadrada(Matriz matriz){
+    matriz.matriz[0][0] = 1;
+    matriz.matriz[0][1] = 2;
+    matriz.matriz[0][2] = 3;
+
+    matriz.matriz[1][0] = 4;
+    matriz.matriz[1][1] = 5;
+    matriz.matriz[1][2] = 6;
+
+    matriz.matriz[2][0] = 7;
+    matriz.matriz[2][1] = 8;
+    matriz.matriz[2][2] = 9;
 }
