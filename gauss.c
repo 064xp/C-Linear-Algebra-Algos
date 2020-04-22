@@ -302,7 +302,7 @@ void hacerCeroDebajo(Matriz matriz, int pivote){
   FRAC menosUno = {-1,1};
   FRAC modificador;
 
-  if(pivote == matriz.filas){
+  if(pivote == matriz.filas -1){
     return;
   }
 
