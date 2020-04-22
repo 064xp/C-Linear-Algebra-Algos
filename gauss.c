@@ -4,20 +4,15 @@
 typedef struct {
   int numerador;
   int denominador;
-}
-FRAC;
+} FRAC;
 
 typedef struct matriz {
   FRAC ** matriz;
   int filas;
   int columnas;
-}
-Matriz;
+} Matriz;
 
-Matriz inicializarMatriz(int filas, int columnas);
-void liberarMatriz(Matriz matriz);
 int resolverGaussJordan(Matriz matriz);
-void imprimirMatriz(Matriz matriz);
 int sumarMatrices(Matriz destino, Matriz m1, Matriz m2);
 int restarMatrices(Matriz destino, Matriz m1, Matriz m2);
 int multiplicarMatrices(Matriz destino, Matriz m1, Matriz m2);
@@ -33,69 +28,72 @@ FRAC suma(FRAC a, FRAC b);
 FRAC rest(FRAC a, FRAC b);
 FRAC simplificacion(FRAC);
 
+void imprimirMatriz(Matriz matriz);
+void liberarMatriz(Matriz matriz);
+Matriz inicializarMatriz(int filas, int columnas);
 void rellenarMatriz(Matriz matriz);
 void rellenarMatrizCuadrada(Matriz matriz);
 
 int main() {
-int fila = 3, columna = 4, error = 0;
-Matriz m1 = inicializarMatriz(fila, columna);
-Matriz m2 = inicializarMatriz(fila, columna);
-Matriz m3 = inicializarMatriz(3, 3);
-Matriz m4 = inicializarMatriz(3, 3);
-FRAC det, traza;
+  int fila = 3, columna = 4, error = 0;
+  Matriz m1 = inicializarMatriz(fila, columna);
+  Matriz m2 = inicializarMatriz(fila, columna);
+  Matriz m3 = inicializarMatriz(3, 3);
+  Matriz m4 = inicializarMatriz(3, 3);
+  FRAC det, traza;
 
-rellenarMatrizCuadrada(m3);
-rellenarMatriz(m1);
-rellenarMatriz(m2);
+  rellenarMatrizCuadrada(m3);
+  rellenarMatriz(m1);
+  rellenarMatriz(m2);
 
-printf("\nMatriz A (Matriz original):\n");
-imprimirMatriz(m1);
-printf("\n\n-------------------------------------\n\n");
+  printf("\nMatriz A (Matriz original):\n");
+  imprimirMatriz(m1);
+  printf("\n\n-------------------------------------\n\n");
 
-printf("Suma A+A\n");
-sumarMatrices(m1, m1, m1);
-imprimirMatriz(m1);
-printf("\n\n-------------------------------------\n\n");
+  printf("Suma A+A\n");
+  sumarMatrices(m1, m1, m1);
+  imprimirMatriz(m1);
+  printf("\n\n-------------------------------------\n\n");
 
-printf("Restar (A+A) - A\n");
-restarMatrices(m1, m1, m2);
-imprimirMatriz(m1);
-printf("\n\n-------------------------------------\n\n");
+  printf("Restar (A+A) - A\n");
+  restarMatrices(m1, m1, m2);
+  imprimirMatriz(m1);
+  printf("\n\n-------------------------------------\n\n");
 
-printf("Gauss Jordan A\n");
-imprimirMatriz(m2);
-printf("\n\n");
-error = resolverGaussJordan(m2);
-imprimirMatriz(m2);
-if (error == 1) {
-  printf("El sistema no tiene soluciones\n");
-} else if (error == 2) {
-  printf("El sistema tiene soluciones infinitas\n");
-}
-printf("\n\n-------------------------------------\n\n");
+  printf("Gauss Jordan A\n");
+  imprimirMatriz(m2);
+  printf("\n\n");
+  error = resolverGaussJordan(m2);
+  imprimirMatriz(m2);
+  if (error == 1) {
+    printf("El sistema no tiene soluciones\n");
+  } else if (error == 2) {
+    printf("El sistema tiene soluciones infinitas\n");
+  }
+  printf("\n\n-------------------------------------\n\n");
 
-printf("Matriz B:\n");
-imprimirMatriz(m3);
-printf("\nMultiplicar B*B\n");
-multiplicarMatrices(m4, m3, m3);
-imprimirMatriz(m4);
+  printf("Matriz B:\n");
+  imprimirMatriz(m3);
+  printf("\nMultiplicar B*B\n");
+  multiplicarMatrices(m4, m3, m3);
+  imprimirMatriz(m4);
 
-printf("\nDeterminante B\n");
-det = calcularDeterminante(m3);
-printf("%i/%i\n", det.numerador, det.denominador);
+  printf("\nDeterminante B\n");
+  det = calcularDeterminante(m3);
+  printf("%i/%i\n", det.numerador, det.denominador);
 
-rellenarMatrizCuadrada(m3);
+  rellenarMatrizCuadrada(m3);
 
-printf("\nTraza B\n");
-traza = calcularTraza(m3);
-printf("%i/%i\n", traza.numerador, traza.denominador);
+  printf("\nTraza B\n");
+  traza = calcularTraza(m3);
+  printf("%i/%i\n", traza.numerador, traza.denominador);
 
-liberarMatriz(m1);
-liberarMatriz(m2);
-liberarMatriz(m3);
-liberarMatriz(m4);
+  liberarMatriz(m1);
+  liberarMatriz(m2);
+  liberarMatriz(m3);
+  liberarMatriz(m4);
 
-return 0;
+  return 0;
 }
 
 /*
@@ -248,55 +246,55 @@ Algoritmos de operaciones de Matrices
 */
 
 int sumarMatrices(Matriz destino, Matriz m1, Matriz m2) {
-int i, j;
-if (m1.filas != m2.filas || m1.columnas != m2.columnas) {
-  return 1;
-}
-for (i = 0; i < m1.filas; i++) {
-  for (j = 0; j < m1.columnas; j++) {
-    destino.matriz[i][j] = suma(m1.matriz[i][j], m2.matriz[i][j]);
+  int i, j;
+  if (m1.filas != m2.filas || m1.columnas != m2.columnas) {
+    return 1;
   }
-}
-return 0;
+  for (i = 0; i < m1.filas; i++) {
+    for (j = 0; j < m1.columnas; j++) {
+      destino.matriz[i][j] = suma(m1.matriz[i][j], m2.matriz[i][j]);
+    }
+  }
+  return 0;
 }
 
 int restarMatrices(Matriz destino, Matriz m1, Matriz m2) {
-int i, j;
-if (m1.filas != m2.filas || m1.columnas != m2.columnas) {
-  return 1;
-}
-for (i = 0; i < m1.filas; i++) {
-  for (j = 0; j < m1.columnas; j++) {
-    destino.matriz[i][j] = rest(m1.matriz[i][j], m2.matriz[i][j]);
+  int i, j;
+  if (m1.filas != m2.filas || m1.columnas != m2.columnas) {
+    return 1;
   }
-}
-return 0;
+  for (i = 0; i < m1.filas; i++) {
+    for (j = 0; j < m1.columnas; j++) {
+      destino.matriz[i][j] = rest(m1.matriz[i][j], m2.matriz[i][j]);
+    }
+  }
+  return 0;
 }
 
 int multiplicarMatrices(Matriz destino, Matriz m1, Matriz m2) {
-int i, j, k;
-FRAC resultado;
+  int i, j, k;
+  FRAC resultado;
 
-resultado.numerador = 0;
-resultado.denominador = 1;
+  resultado.numerador = 0;
+  resultado.denominador = 1;
 
-if (m1.columnas != m2.filas) {
-  return 1;
-}
-
-for (i = 0; i < m1.filas; i++) {
-  for (j = 0; j < m2.columnas; j++) {
-    for (k = 0; k < m1.columnas; k++) {
-      resultado = suma(resultado, mult(m1.matriz[i][k], m2.matriz[k][j]));
-      //resultado += m1.matriz[i][k] * m2.matriz[k][j];
-    }
-    destino.matriz[i][j] = resultado;
-    //resultado = 0;
-    resultado.numerador = 0;
-    resultado.denominador = 1;
+  if (m1.columnas != m2.filas) {
+    return 1;
   }
-}
-return 0;
+
+  for (i = 0; i < m1.filas; i++) {
+    for (j = 0; j < m2.columnas; j++) {
+      for (k = 0; k < m1.columnas; k++) {
+        resultado = suma(resultado, mult(m1.matriz[i][k], m2.matriz[k][j]));
+        //resultado += m1.matriz[i][k] * m2.matriz[k][j];
+      }
+      destino.matriz[i][j] = resultado;
+      //resultado = 0;
+      resultado.numerador = 0;
+      resultado.denominador = 1;
+    }
+  }
+  return 0;
 }
 
 void hacerCeroDebajo(Matriz matriz, int pivote){
