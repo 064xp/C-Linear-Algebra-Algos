@@ -1,4 +1,4 @@
-﻿#include <stdio.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 typedef struct {
@@ -33,13 +33,18 @@ void liberarMatriz(Matriz matriz);
 Matriz inicializarMatriz(int filas, int columnas);
 void rellenarMatriz(Matriz matriz);
 void rellenarMatrizCuadrada(Matriz matriz);
+int matrizInversa (Matriz matriz, Matriz inversa);
+void copiarMatriz(Matriz original, Matriz copia);
 
 int main() {
   int fila = 3, columna = 4, error = 0;
+  int tamMtzCuadra = 3;
   Matriz m1 = inicializarMatriz(fila, columna);
   Matriz m2 = inicializarMatriz(fila, columna);
-  Matriz m3 = inicializarMatriz(3, 3);
-  Matriz m4 = inicializarMatriz(3, 3);
+  Matriz m3 = inicializarMatriz(tamMtzCuadra, tamMtzCuadra);
+  Matriz m4 = inicializarMatriz(tamMtzCuadra, tamMtzCuadra);
+  Matriz m5 = inicializarMatriz(tamMtzCuadra,tamMtzCuadra);
+  Matriz inversa = inicializarMatriz(fila,fila);
   FRAC det, traza;
 
   rellenarMatrizCuadrada(m3);
@@ -74,25 +79,38 @@ int main() {
 
   printf("Matriz B:\n");
   imprimirMatriz(m3);
+  printf("\n\n-------------------------------------\n");
   printf("\nMultiplicar B*B\n");
   multiplicarMatrices(m4, m3, m3);
   imprimirMatriz(m4);
+  printf("\n-------------------------------------\n");
 
   printf("\nDeterminante B\n");
-  det = calcularDeterminante(m3);
+  copiarMatriz(m3, m5);
+  det = calcularDeterminante(m5);
   printf("%i/%i\n", det.numerador, det.denominador);
+  printf("\n-------------------------------------\n");
 
   rellenarMatrizCuadrada(m3);
 
   printf("\nTraza B\n");
   traza = calcularTraza(m3);
   printf("%i/%i\n", traza.numerador, traza.denominador);
+  printf("\n-------------------------------------\n\n");
+
+  printf("\nInversa de B\n");
+  if(matrizInversa(m3, inversa)){
+    printf("La matriz introducida no tiene inversa\n");
+  }
+  imprimirMatriz(inversa);
+  printf("\n\n-------------------------------------\n\n");
 
   liberarMatriz(m1);
   liberarMatriz(m2);
   liberarMatriz(m3);
   liberarMatriz(m4);
-
+  liberarMatriz(m5);
+  liberarMatriz(inversa);
   return 0;
 }
 
@@ -135,7 +153,7 @@ FRAC rest(FRAC a, FRAC b) {
 FRAC simplificacion(FRAC a) {
   int i = 2;
 
-  while (i abs(<= a.numerador)) {
+  while (i <= abs(a.numerador)) {
     while (a.numerador % i == 0 && a.denominador % i == 0) {
       a.numerador = a.numerador / i;
       a.denominador = a.denominador / i;
@@ -286,10 +304,8 @@ int multiplicarMatrices(Matriz destino, Matriz m1, Matriz m2) {
     for (j = 0; j < m2.columnas; j++) {
       for (k = 0; k < m1.columnas; k++) {
         resultado = suma(resultado, mult(m1.matriz[i][k], m2.matriz[k][j]));
-        //resultado += m1.matriz[i][k] * m2.matriz[k][j];
       }
       destino.matriz[i][j] = resultado;
-      //resultado = 0;
       resultado.numerador = 0;
       resultado.denominador = 1;
     }
@@ -331,9 +347,17 @@ FRAC calcularTraza (Matriz matriz){
   return traza;
 }
 
+//Regresa una fraccion con denominador 0 si
+//la matriz no tiene determinante
 FRAC calcularDeterminante(Matriz matriz){
   int i;
   FRAC determinante = matriz.matriz[0][0];
+
+  //La matriz no es cuadrada
+  if(matriz.filas != matriz.columnas){
+    determinante.denominador = 0;
+    return determinante;
+  }
 
   triangularSuperior(matriz);
 
@@ -344,195 +368,243 @@ FRAC calcularDeterminante(Matriz matriz){
   return determinante;
 }
 
+int matrizInversa (Matriz matriz, Matriz inversa){
+  FRAC determinante;
+  int i, j, error;
+  Matriz m1 = inicializarMatriz(matriz.filas, matriz.columnas*2);
+  copiarMatriz(matriz, inversa);
+  determinante = calcularDeterminante(inversa);
+
+  if(determinante.numerador == 0 || determinante.denominador == 0){
+    liberarMatriz(m1);
+    return 1;
+  }
+
+  //copiar primera mitad de la matriz a resolver
+  for(i=0; i<matriz.filas; i++){
+    for(j=0; j<matriz.columnas; j++){
+      m1.matriz[i][j].numerador = matriz.matriz[i][j].numerador;
+      m1.matriz[i][j].denominador = matriz.matriz[i][j].denominador;
+    }
+  }
+
+  for(i=0; i<matriz.filas; i++){
+    for(j=matriz.filas; j<matriz.columnas *2; j++){
+      if(j - i == matriz.filas){
+        m1.matriz[i][j].numerador = 1;
+        m1.matriz[i][j].denominador = 1;
+      }
+      else{
+        m1.matriz[i][j].numerador = 0;
+        m1.matriz[i][j].denominador = 1;
+      }
+    }
+  }
+  resolverGaussJordan(m1);
+  printf("\n");
+
+  for(i=0; i<matriz.filas; i++){
+    for(j=0; j<matriz.columnas; j++){
+      inversa.matriz[i][j].numerador = m1.matriz[i][j+matriz.columnas].numerador;
+      inversa.matriz[i][j].denominador = m1.matriz[i][j+matriz.columnas].denominador;
+    }
+  }
+  liberarMatriz(m1);
+  return 0;
+}
+
+
 /*******************************************************************************
                   Funciones de Desarrollo
-
 Las funciones que siguen, son unicamente para auxiliar durante el desarrollo
 no forman parte de los algoritmos
-
 *******************************************************************************/
 
 Matriz inicializarMatriz(int filas, int columnas) {
-int i;
-Matriz matriz;
+  int i;
+  Matriz matriz;
 
-matriz.filas = filas;
-matriz.columnas = columnas;
-matriz.matriz = (FRAC ** ) malloc(sizeof(FRAC * ) * filas);
-if (matriz.matriz) {
-  for (i = 0; i < filas; i++) {
-    matriz.matriz[i] = malloc(sizeof(FRAC) * columnas);
-    if (matriz.matriz[i] == NULL) {
-      perror("Error Alocando Matriz 01");
-      exit(1);
+  matriz.filas = filas;
+  matriz.columnas = columnas;
+  matriz.matriz = (FRAC ** ) malloc(sizeof(FRAC * ) * filas);
+  if (matriz.matriz) {
+    for (i = 0; i < filas; i++) {
+      matriz.matriz[i] = malloc(sizeof(FRAC) * columnas);
+      if (matriz.matriz[i] == NULL) {
+        perror("Error Alocando Matriz 01");
+        exit(1);
+      }
     }
+  } else {
+    perror("Error Alocando Matriz 02");
+    exit(1);
   }
-} else {
-  perror("Error Alocando Matriz 02");
-  exit(1);
-}
 
-return matriz;
+  return matriz;
 }
 
 void liberarMatriz(Matriz matriz) {
-int i, j;
-for (i = 0; i < matriz.filas; i++) {
-  free(matriz.matriz[i]);
-}
-free(matriz.matriz);
+  int i, j;
+  for (i = 0; i < matriz.filas; i++) {
+    free(matriz.matriz[i]);
+  }
+  free(matriz.matriz);
 }
 
 void imprimirMatriz(Matriz matriz) {
-int i, j;
-for (i = 0; i < matriz.filas; i++) {
-  for (j = 0; j < matriz.columnas; j++) {
-    if (matriz.matriz[i][j].denominador == 1) {
-      printf("%i  ", matriz.matriz[i][j].numerador);
-    } else if (matriz.matriz[i][j].numerador == 0) {
-      printf("%i  ", matriz.matriz[i][j].numerador);
-    } else if (matriz.matriz[i][j].numerador == matriz.matriz[i][j].denominador) {
-      printf("1  ");
-    } else if (matriz.matriz[i][j].numerador % matriz.matriz[i][j].denominador == 0) {
-      printf("%i  ", matriz.matriz[i][j].numerador / matriz.matriz[i][j].denominador);
-    } else {
-      printf("%i/%i  ", matriz.matriz[i][j].numerador, matriz.matriz[i][j].denominador);
+  int i, j;
+  for (i = 0; i < matriz.filas; i++) {
+    for (j = 0; j < matriz.columnas; j++) {
+      if (matriz.matriz[i][j].denominador == 1) {
+        printf("%i  ", matriz.matriz[i][j].numerador);
+      } else if (matriz.matriz[i][j].numerador == 0) {
+        printf("%i  ", matriz.matriz[i][j].numerador);
+      } else if (matriz.matriz[i][j].numerador == matriz.matriz[i][j].denominador) {
+        printf("1  ");
+      } else if (matriz.matriz[i][j].numerador % matriz.matriz[i][j].denominador == 0) {
+        printf("%i  ", matriz.matriz[i][j].numerador / matriz.matriz[i][j].denominador);
+      } else {
+        printf("%i/%i  ", matriz.matriz[i][j].numerador, matriz.matriz[i][j].denominador);
+      }
+    }
+    printf("\n");
+  }
+}
+
+void copiarMatriz(Matriz original, Matriz copia){
+  int i, j;
+  for(i=0; i<original.filas; i++){
+    for(j=0; j<original.columnas; j++){
+      copia.matriz[i][j].numerador = original.matriz[i][j].numerador;
+      copia.matriz[i][j].denominador = original.matriz[i][j].denominador;
     }
   }
-  printf("\n");
-}
 }
 
 void rellenarMatriz(Matriz matriz) {
-/*
-| 1   -2  4  -2 |
-| 2  -1   2   4 |
-| 3   -3  6   2 |
-*/
+  //Sin solucion
+  // matriz.matriz[0][0] = 1;
+  // matriz.matriz[0][1] = -3;
+  // matriz.matriz[0][2] = 2;
+  // matriz.matriz[0][3] = -4;
+  //
+  // matriz.matriz[1][0] = 2;
+  // matriz.matriz[1][1] = 5;
+  // matriz.matriz[1][2] = -3;
+  // matriz.matriz[1][3] = 1;
+  //
+  // matriz.matriz[2][0] = 3;
+  // matriz.matriz[2][1] = 2;
+  // matriz.matriz[2][2] = -1;
+  // matriz.matriz[2][3] = -2;
 
-//Sin solucion
-// matriz.matriz[0][0] = 1;
-// matriz.matriz[0][1] = -3;
-// matriz.matriz[0][2] = 2;
-// matriz.matriz[0][3] = -4;
-//
-// matriz.matriz[1][0] = 2;
-// matriz.matriz[1][1] = 5;
-// matriz.matriz[1][2] = -3;
-// matriz.matriz[1][3] = 1;
-//
-// matriz.matriz[2][0] = 3;
-// matriz.matriz[2][1] = 2;
-// matriz.matriz[2][2] = -1;
-// matriz.matriz[2][3] = -2;
+  //soluciones infinitas
+  matriz.matriz[0][0].numerador = 1;
+  matriz.matriz[0][0].denominador = 2;
 
-//soluciones infinitas
-matriz.matriz[0][0].numerador = 1;
-matriz.matriz[0][0].denominador = 2;
+  matriz.matriz[0][1].numerador = -1;
+  matriz.matriz[0][1].denominador = 1;
 
-matriz.matriz[0][1].numerador = -1;
-matriz.matriz[0][1].denominador = 1;
+  matriz.matriz[0][2].numerador = 1;
+  matriz.matriz[0][2].denominador = 1;
 
-matriz.matriz[0][2].numerador = 1;
-matriz.matriz[0][2].denominador = 1;
+  matriz.matriz[0][3].numerador = -2;
+  matriz.matriz[0][3].denominador = 1;
 
-matriz.matriz[0][3].numerador = -2;
-matriz.matriz[0][3].denominador = 1;
+  matriz.matriz[1][0].numerador = 6;
+  matriz.matriz[1][0].denominador = 1;
 
-matriz.matriz[1][0].numerador = 6;
-matriz.matriz[1][0].denominador = 1;
+  matriz.matriz[1][1].numerador = -1;
+  matriz.matriz[1][1].denominador = 1;
 
-matriz.matriz[1][1].numerador = -1;
-matriz.matriz[1][1].denominador = 1;
+  matriz.matriz[1][2].numerador = 2;
+  matriz.matriz[1][2].denominador = 1;
 
-matriz.matriz[1][2].numerador = 2;
-matriz.matriz[1][2].denominador = 1;
+  matriz.matriz[1][3].numerador = 4;
+  matriz.matriz[1][3].denominador = 1;
 
-matriz.matriz[1][3].numerador = 4;
-matriz.matriz[1][3].denominador = 1;
+  matriz.matriz[2][0].numerador = 3;
+  matriz.matriz[2][0].denominador = 1;
 
-matriz.matriz[2][0].numerador = 3;
-matriz.matriz[2][0].denominador = 1;
+  matriz.matriz[2][1].numerador = -3;
+  matriz.matriz[2][1].denominador = 1;
 
-matriz.matriz[2][1].numerador = -3;
-matriz.matriz[2][1].denominador = 1;
+  matriz.matriz[2][2].numerador = 6;
+  matriz.matriz[2][2].denominador = 1;
 
-matriz.matriz[2][2].numerador = 6;
-matriz.matriz[2][2].denominador = 1;
+  matriz.matriz[2][3].numerador = 2;
+  matriz.matriz[2][3].denominador = 1;
 
-matriz.matriz[2][3].numerador = 2;
-matriz.matriz[2][3].denominador = 1;
-
-//Soluciones reales
-// matriz.matriz[0][0] = 2;
-// matriz.matriz[0][1] = -3;
-// matriz.matriz[0][2] = 6;
-// matriz.matriz[0][3] = -4;
-//
-// matriz.matriz[1][0] = 3;
-// matriz.matriz[1][1] = 1;
-// matriz.matriz[1][2] = -5;
-// matriz.matriz[1][3] = 8;
-//
-// matriz.matriz[2][0] = 7;
-// matriz.matriz[2][1] = -1;
-// matriz.matriz[2][2] = 1;
-// matriz.matriz[2][3] = 6;
+  //Soluciones reales
+  // matriz.matriz[0][0] = 2;
+  // matriz.matriz[0][1] = -3;
+  // matriz.matriz[0][2] = 6;
+  // matriz.matriz[0][3] = -4;
+  //
+  // matriz.matriz[1][0] = 3;
+  // matriz.matriz[1][1] = 1;
+  // matriz.matriz[1][2] = -5;
+  // matriz.matriz[1][3] = 8;
+  //
+  // matriz.matriz[2][0] = 7;
+  // matriz.matriz[2][1] = -1;
+  // matriz.matriz[2][2] = 1;
+  // matriz.matriz[2][3] = 6;
 }
 
 void rellenarMatrizCuadrada(Matriz matriz) {
 
-matriz.matriz[0][0].numerador = 1;
-matriz.matriz[0][0].denominador = 1;
+  matriz.matriz[0][0].numerador = 1;
+  matriz.matriz[0][0].denominador = 1;
 
-matriz.matriz[0][1].numerador = 2;
-matriz.matriz[0][1].denominador = 1;
+  matriz.matriz[0][1].numerador = -1;
+  matriz.matriz[0][1].denominador = 1;
 
-matriz.matriz[0][2].numerador = 3;
-matriz.matriz[0][2].denominador = 1;
+  matriz.matriz[0][2].numerador = 0;
+  matriz.matriz[0][2].denominador = 1;
 
-matriz.matriz[1][0].numerador = 4;
-matriz.matriz[1][0].denominador = 1;
+  matriz.matriz[1][0].numerador = 0;
+  matriz.matriz[1][0].denominador = 1;
 
-matriz.matriz[1][1].numerador = 5;
-matriz.matriz[1][1].denominador = 1;
+  matriz.matriz[1][1].numerador = 1;
+  matriz.matriz[1][1].denominador = 1;
 
-matriz.matriz[1][2].numerador = 6;
-matriz.matriz[1][2].denominador = 1;
+  matriz.matriz[1][2].numerador = 0;
+  matriz.matriz[1][2].denominador = 1;
 
-matriz.matriz[2][0].numerador = 7;
-matriz.matriz[2][0].denominador = 1;
+  matriz.matriz[2][0].numerador = 2;
+  matriz.matriz[2][0].denominador = 1;
 
-matriz.matriz[2][1].numerador = 8;
-matriz.matriz[2][1].denominador = 1;
+  matriz.matriz[2][1].numerador = 0;
+  matriz.matriz[2][1].denominador = 1;
 
-matriz.matriz[2][2].numerador = 9;
-matriz.matriz[2][2].denominador = 1;
+  matriz.matriz[2][2].numerador = 1;
+  matriz.matriz[2][2].denominador = 1;
 
-// matriz.matriz[0][0].numerador = 6;
-// matriz.matriz[0][0].denominador = 1;
-//
-// matriz.matriz[0][1].numerador = 7;
-// matriz.matriz[0][1].denominador = 1;
-//
-// matriz.matriz[0][2].numerador = 9;
-// matriz.matriz[0][2].denominador = 1;
-//
-// matriz.matriz[1][0].numerador = 13;
-// matriz.matriz[1][0].denominador = 1;
-//
-// matriz.matriz[1][1].numerador = 13;
-// matriz.matriz[1][1].denominador = 1;
-//
-// matriz.matriz[1][2].numerador = 12;
-// matriz.matriz[1][2].denominador = 1;
-//
-// matriz.matriz[2][0].numerador = 2;
-// matriz.matriz[2][0].denominador = 1;
-//
-// matriz.matriz[2][1].numerador = 2;
-// matriz.matriz[2][1].denominador = 1;
-//
-// matriz.matriz[2][2].numerador = 1;
-// matriz.matriz[2][2].denominador = 1;
+  // matriz.matriz[0][0].numerador = 6;
+  // matriz.matriz[0][0].denominador = 1;
+  //
+  // matriz.matriz[0][1].numerador = 7;
+  // matriz.matriz[0][1].denominador = 1;
+  //
+  // matriz.matriz[0][2].numerador = 9;
+  // matriz.matriz[0][2].denominador = 1;
+  //
+  // matriz.matriz[1][0].numerador = 13;
+  // matriz.matriz[1][0].denominador = 1;
+  //
+  // matriz.matriz[1][1].numerador = 13;
+  // matriz.matriz[1][1].denominador = 1;
+  //
+  // matriz.matriz[1][2].numerador = 12;
+  // matriz.matriz[1][2].denominador = 1;
+  //
+  // matriz.matriz[2][0].numerador = 2;
+  // matriz.matriz[2][0].denominador = 1;
+  //
+  // matriz.matriz[2][1].numerador = 2;
+  // matriz.matriz[2][1].denominador = 1;
+  //
+  // matriz.matriz[2][2].numerador = 1;
+  // matriz.matriz[2][2].denominador = 1;
 }
