@@ -135,7 +135,7 @@ FRAC rest(FRAC a, FRAC b) {
 FRAC simplificacion(FRAC a) {
   int i = 2;
 
-  while (i <= a.numerador) {
+  while (i abs(<= a.numerador)) {
     while (a.numerador % i == 0 && a.denominador % i == 0) {
       a.numerador = a.numerador / i;
       a.denominador = a.denominador / i;
